@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frapes Market Intel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <h1>Frapes Market Intel</h1>
+      <div class="header-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="status">Connecting...</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="last-update" id="lastUpdate">--:--:--</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel prices-panel">
+      <div class="panel-header">
+        <h2>Live Market Prices</h2>
+        <span class="panel-badge" id="itemCount">-- items</span>
+      </div>
+      <div class="price-grid" id="priceGrid">
+        <div class="loading">Loading market data...</div>
+      </div>
+    </section>
+
+    <section class="panel orders-panel">
+      <div class="panel-header">
+        <h2>Order Book</h2>
+      </div>
+      <div class="item-chips" id="itemChips">
+        <!-- Chips injected here -->
+      </div>
+      <div class="order-book" id="orderBook">
+        <p class="placeholder">Click an item above to scan orders</p>
+      </div>
+    </section>
+
+    <section class="panel alerts-panel">
+      <div class="panel-header">
+        <h2>Price Alerts</h2>
+        <span class="panel-badge" id="alertCount">0 watching</span>
+        <span class="panel-badge" id="alertTimer">Next scan: --s</span>
+      </div>
+      <div class="alert-controls">
+        <input type="text" id="alertItemInput" placeholder="Type item name..." list="alertItemSuggestions">
+        <datalist id="alertItemSuggestions"></datalist>
+        <button class="alert-add-btn" onclick="addAlertWatch()">+ Watch</button>
+        <label class="alert-sound-toggle">
+          <input type="checkbox" id="alertSoundToggle" checked>
+          Sound
+        </label>
+        <label class="alert-sound-toggle">
+          <input type="checkbox" id="alertNotifToggle" checked>
+          Notifications
+        </label>
+      </div>
+      <div class="alert-list" id="alertList">
+        <p class="placeholder">Add items above to watch for price moves</p>
+      </div>
+    </section>
+
+    <section class="panel jobs-panel">
+      <div class="panel-header">
+        <h2>Job Board</h2>
+        <span class="panel-badge" id="jobCount">-- jobs</span>
+      </div>
+      <div class="job-list" id="jobList">
+        <div class="loading">Loading job data...</div>
+      </div>
+    </section>
+
+    <section class="panel analytics-panel">
+      <div class="panel-header">
+        <h2>Market Analytics</h2>
+        <span class="panel-badge">Volatility &amp; Correlations</span>
+      </div>
+
+      <div class="analytics-content">
+        <div class="analytics-section">
+          <h3>Volatility Ranking</h3>
+          <div class="volatility-ranking" id="volatilityRanking">
+            <p class="placeholder">Collecting volatility data...</p>
+          </div>
+        </div>
+
+        <div class="analytics-section">
+          <h3>Price Correlations</h3>
+          <div class="correlation-matrix" id="correlationMatrix">
+            <p class="placeholder">Collecting correlation data...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Frapes Market Intel &mdash; Read-only display tool using official public API</span>
+    <span>Prices: 30s &bull; Jobs: 60s &bull; Analytics: 2m</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
