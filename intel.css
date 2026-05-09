@@ -5,7 +5,6 @@
 }
 
 :root {
-  /* Military camo / gray palette (same as trading) */
   --bg:          #1a1c1a;
   --bg-alt:      #151715;
   --panel:       #222522;
@@ -697,47 +696,64 @@ main {
 
 .intel-card:hover {
   background: var(--panel-hi);
-  border-color: var(--cyan);
 }
 
 .intel-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
 }
 
 .intel-card-name {
   font-weight: 600;
   color: var(--text);
-  font-size: 0.82rem;
-  text-transform: capitalize;
+  font-size: 0.85rem;
 }
 
 .intel-card-rank {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.intel-card-scan-btn {
   font-size: 0.65rem;
   font-family: var(--mono);
   color: var(--cyan);
-  background: var(--cyan-dim);
+  cursor: pointer;
   padding: 1px 6px;
   border-radius: 2px;
+  border: 1px solid var(--cyan-dim);
+  background: transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.intel-card-scan-btn:hover {
+  background: var(--cyan-dim);
+  color: var(--cyan);
 }
 
 .intel-card-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3px 8px;
-  font-size: 0.72rem;
+  gap: 4px 12px;
 }
 
 .intel-stat {
   display: flex;
   justify-content: space-between;
-  color: var(--text-dim);
+  align-items: center;
+  font-size: 0.72rem;
 }
 
 .intel-stat-label {
-  color: var(--text-muted);
+  color: var(--text-dim);
 }
 
 .intel-stat-value {
@@ -747,53 +763,38 @@ main {
 }
 
 .intel-stat-value.wealth { color: var(--cyan); }
-.intel-stat-value.wars { color: var(--red); }
 .intel-stat-value.allies { color: var(--green-bright); }
-.intel-stat-value.unrest-high { color: var(--yellow); }
+.intel-stat-value.wars { color: var(--red); }
+.intel-stat-value.unrest-high { color: var(--red); }
 .intel-stat-value.unrest-low { color: var(--green); }
 
 .intel-card-resources {
-  margin-top: 6px;
+  margin-top: 8px;
   padding-top: 6px;
   border-top: 1px solid var(--border);
-  font-size: 0.7rem;
 }
 
 .intel-resource-label {
-  color: var(--text-muted);
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 2px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
 }
 
 .intel-resource-items {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 4px;
 }
 
 .intel-resource-tag {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-family: var(--mono);
-  padding: 1px 5px;
+  padding: 1px 6px;
   border-radius: 2px;
-  background: var(--purple-dim);
-  color: var(--purple);
-  text-transform: capitalize;
-}
-
-/* --- Footer --- */
-
-footer {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 24px;
-  background: var(--bg-alt);
-  border-top: 1px solid var(--border);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  font-family: var(--mono);
+  background: var(--yellow-dim);
+  color: var(--yellow);
 }
 
 /* --- Population Scanning --- */
