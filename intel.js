@@ -781,6 +781,20 @@ function renderScanCountryCard(result) {
 }
 
 function renderSkillBars(skillLevels, skills) {
+  // Human-readable skill names
+  const skillNames = {
+    attack: 'Attack',
+    criticalChance: 'Crit Chance',
+    criticalDamages: 'Crit Dmg',
+    armor: 'Armor',
+    precision: 'Precision',
+    dodge: 'Dodge',
+    companies: 'Companies',
+    entrepreneurship: 'Entrepreneurship',
+    production: 'Production',
+    management: 'Management'
+  };
+
   if (!skills || skills.length === 0) return '';
 
   return skills.map(skill => {
@@ -788,7 +802,9 @@ function renderSkillBars(skillLevels, skills) {
     const maxLevel = Object.keys(levels).reduce((max, l) => Math.max(max, parseInt(l)), 0);
     const topLevel = Math.min(maxLevel, 10); // Show up to level 10
 
-    let bars = '';
+    const displayName = skillNames[skill] || skill.charAt(0).toUpperCase() + skill.slice(1);
+
+    let bars = `<div class="skill-group-label">${displayName}</div>`;
     for (let level = 0; level <= topLevel; level++) {
       const count = levels[level] || 0;
       const pct = count > 0 ? (count / Object.values(levels).reduce((a, b) => a + b, 0) * 100) : 0;

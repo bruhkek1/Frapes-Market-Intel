@@ -928,6 +928,22 @@ footer {
   gap: 4px;
 }
 
+.skill-group-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  margin-bottom: 2px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2px;
+}
+
+.skill-group-label:first-child {
+  margin-top: 0;
+}
+
 .scan-stat-bar-row {
   display: flex;
   align-items: center;
