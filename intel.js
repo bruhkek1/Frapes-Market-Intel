@@ -581,16 +581,28 @@ async function deepScanCountry(countryId) {
 }
 
 async function startQuickScan() {
-  if (isScanning || !intelCountryIds) {
-    alert('Please select countries first');
+  if (isScanning) {
+    alert('A scan is already in progress');
     return;
+  }
+
+  // Resolve country IDs (same logic as fetchCountryIntel)
+  let countryIds;
+  if (intelCountryIds) {
+    countryIds = intelCountryIds;
+  } else {
+    const data = await callAPI('ranking.getRanking', { rankingType: 'countryWealth' });
+    if (!data || !data.items) {
+      alert('Failed to load country list');
+      return;
+    }
+    countryIds = data.items.slice(0, 20).map(item => item.country);
   }
 
   isScanning = true;
   updateScanUI('scanning');
   scanResults = {};
 
-  const countryIds = Array.from(intelCountryIds);
   const total = countryIds.length;
 
   for (let i = 0; i < countryIds.length; i++) {
@@ -613,16 +625,28 @@ async function startQuickScan() {
 }
 
 async function startDeepScan() {
-  if (isScanning || !intelCountryIds) {
-    alert('Please select countries first');
+  if (isScanning) {
+    alert('A scan is already in progress');
     return;
+  }
+
+  // Resolve country IDs (same logic as fetchCountryIntel)
+  let countryIds;
+  if (intelCountryIds) {
+    countryIds = intelCountryIds;
+  } else {
+    const data = await callAPI('ranking.getRanking', { rankingType: 'countryWealth' });
+    if (!data || !data.items) {
+      alert('Failed to load country list');
+      return;
+    }
+    countryIds = data.items.slice(0, 20).map(item => item.country);
   }
 
   isScanning = true;
   updateScanUI('scanning');
   scanResults = {};
 
-  const countryIds = Array.from(intelCountryIds);
   const total = countryIds.length;
 
   for (let i = 0; i < countryIds.length; i++) {
