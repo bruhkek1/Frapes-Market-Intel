@@ -88,6 +88,24 @@
         <div class="loading">Loading country data...</div>
       </div>
     </section>
+
+    <!-- Population Scanning -->
+    <section class="panel scan-panel">
+      <div class="panel-header">
+        <h2>Population Scan</h2>
+        <div class="scan-controls">
+          <button class="scan-btn" onclick="startQuickScan()">Quick Scan</button>
+          <button class="scan-btn scan-deep" onclick="startDeepScan()">Deep Scan</button>
+          <span class="scan-status" id="scanStatus">Ready</span>
+        </div>
+      </div>
+      <div class="scan-progress" id="scanProgress" style="display: none;">
+        <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+      </div>
+      <div class="scan-results" id="scanResults">
+        <div class="loading">Select countries above and click scan</div>
+      </div>
+    </section>
   </main>
 
   <footer>

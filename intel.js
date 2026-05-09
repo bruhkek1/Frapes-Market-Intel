@@ -474,11 +474,370 @@ function timeAgo(dateStr) {
   return `${days}d`;
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function updateStatus(state, msg) {
   const dot = document.getElementById('statusDot');
   const text = document.getElementById('status');
   dot.className = 'status-dot ' + state;
   text.textContent = state === 'live' ? 'Live' : (msg || state);
+}
+
+// --- Population Scanning ---
+
+const SCAN_CONFIG = {
+  quickSampleSize: 10,  // Users to sample for quick scan
+  deepSampleSize: 10,   // Users to sample for deep scan (testing limit)
+  apiDelay: 500,        // ms delay between API calls for deep scan
+  topUsersLimit: 100    // Get top 100 users by damage for quick scan
+};
+
+let isScanning = false;
+let scanResults = {};
+
+async function startQuickScan() {
+  if (isScanning || !intelCountryIds) {
+    alert('Please select countries first');
+    return;
+  }
+
+  isScanning = true;
+  updateScanUI('scanning');
+  scanResults = {};
+
+  const countryIds = Array.from(intelCountryIds);
+  const total = countryIds.length;
+
+  for (let i = 0; i < countryIds.length; i++) {
+    const countryId = countryIds[i];
+    const progress = ((i + 1) / total) * 100;
+    updateScanProgress(progress);
+    updateScanStatus(`Scanning ${resolveCountry(countryId)} (${i + 1}/${total})`);
+
+    const result = await scanCountryQuick(countryId);
+    if (result) {
+      scanResults[countryId] = result;
+    }
+
+    await sleep(SCAN_CONFIG.apiDelay);
+  }
+
+  renderScanResults();
+  isScanning = false;
+  updateScanUI('ready');
+}
+
+async function startDeepScan() {
+  if (isScanning || !intelCountryIds) {
+    alert('Please select countries first');
+    return;
+  }
+
+  isScanning = true;
+  updateScanUI('scanning');
+  scanResults = {};
+
+  const countryIds = Array.from(intelCountryIds);
+  const total = countryIds.length;
+
+  for (let i = 0; i < countryIds.length; i++) {
+    const countryId = countryIds[i];
+    const progress = ((i + 1) / total) * 100;
+    updateScanProgress(progress);
+    updateScanStatus(`Deep scanning ${resolveCountry(countryId)} (${i + 1}/${total})`);
+
+    const result = await scanCountryDeep(countryId);
+    if (result) {
+      scanResults[countryId] = result;
+    }
+
+    // Rate limiting for deep scan
+    await sleep(SCAN_CONFIG.apiDelay);
+  }
+
+  renderScanResults();
+  isScanning = false;
+  updateScanUI('ready');
+}
+
+async function scanCountryQuick(countryId) {
+  try {
+    // Get top users by damage for this country
+    const rankingData = await callAPI('ranking.getRanking', { rankingType: 'userDamages' });
+    if (!rankingData || !rankingData.items) return null;
+
+    // Get users from this country
+    const countryUsers = rankingData.items.filter(u => u.country === countryId);
+    if (countryUsers.length === 0) return null;
+
+    // Get user IDs (top N by damage)
+    const topUserIds = countryUsers.slice(0, SCAN_CONFIG.topUsersLimit).map(u => u.userId || u.user);
+    if (topUserIds.length === 0) return null;
+
+    // Sample users
+    const sampledIds = topUserIds.slice(0, SCAN_CONFIG.quickSampleSize);
+
+    // Fetch user data
+    const users = await Promise.all(sampledIds.map(id =>
+      callAPI('user.getUserLite', { userId: id }).catch(() => null)
+    ));
+
+    const validUsers = users.filter(u => u && u.skills);
+
+    return calculatePopulationStats(countryId, validUsers);
+  } catch (err) {
+    console.error('Quick scan failed:', err);
+    return null;
+  }
+}
+
+async function scanCountryDeep(countryId) {
+  try {
+    // Paginate through all users
+    let allUserIds = [];
+    let cursor = null;
+    let hasMore = true;
+
+    while (hasMore) {
+      const data = await callAPI('user.getUsersByCountry', {
+        countryId,
+        limit: 100,
+        cursor
+      });
+
+      if (!data || !data.items) break;
+
+      allUserIds = allUserIds.concat(data.items.map(u => u._id));
+      cursor = data.nextCursor;
+      hasMore = !!cursor;
+
+      // Stop if we have enough
+      if (allUserIds.length >= 500) break;
+    }
+
+    if (allUserIds.length === 0) return null;
+
+    // Sample users (testing limit)
+    const sampledIds = allUserIds.slice(0, SCAN_CONFIG.deepSampleSize);
+
+    // Fetch user data with rate limiting
+    const users = [];
+    for (const userId of sampledIds) {
+      const userData = await callAPI('user.getUserLite', { userId }).catch(() => null);
+      if (userData && userData.skills) {
+        users.push(userData);
+      }
+      await sleep(200); // Extra delay between user fetches
+    }
+
+    return calculatePopulationStats(countryId, users, allUserIds.length);
+  } catch (err) {
+    console.error('Deep scan failed:', err);
+    return null;
+  }
+}
+
+function calculatePopulationStats(countryId, users, totalPopulation) {
+  const countryName = resolveCountry(countryId);
+  const pop = totalPopulation || users.length;
+
+  // Skill thresholds
+  const WAR_SKILLS = ['attack', 'criticalChance', 'criticalDamages', 'armor', 'precision', 'dodge'];
+  const ECO_SKILLS = ['companies', 'entrepreneurship', 'production', 'management'];
+  const WAR_THRESHOLD = 3; // Level 3+ considered "specced"
+  const ECO_THRESHOLD = 3;
+
+  let warSpecced = 0;
+  let ecoSpecced = 0;
+  let buffed = 0;
+  let debuffed = 0;
+  let neutral = 0;
+
+  // Skill level distributions
+  const skillLevels = {};
+
+  for (const user of users) {
+    const skills = user.skills || {};
+
+    // Check war spec
+    let warLevel = 0;
+    for (const skill of WAR_SKILLS) {
+      const level = skills[skill]?.level || 0;
+      warLevel = Math.max(warLevel, level);
+
+      // Track distribution
+      if (!skillLevels[skill]) skillLevels[skill] = {};
+      skillLevels[skill][level] = (skillLevels[skill][level] || 0) + 1;
+    }
+
+    // Check eco spec
+    let ecoLevel = 0;
+    for (const skill of ECO_SKILLS) {
+      const level = skills[skill]?.level || 0;
+      ecoLevel = Math.max(ecoLevel, level);
+
+      if (!skillLevels[skill]) skillLevels[skill] = {};
+      skillLevels[skill][level] = (skillLevels[skill][level] || 0) + 1;
+    }
+
+    if (warLevel >= WAR_THRESHOLD) warSpecced++;
+    if (ecoLevel >= ECO_THRESHOLD) ecoSpecced++;
+
+    // Check buff/debuff status
+    const attackSkill = skills.attack;
+    if (attackSkill) {
+      const buffs = attackSkill.buffsPercent || 0;
+      const debuffs = attackSkill.debuffsPercent || 0;
+
+      if (buffs > 0) buffed++;
+      else if (debuffs > 0) debuffed++;
+      else neutral++;
+    }
+  }
+
+  const total = users.length;
+
+  return {
+    countryId,
+    countryName,
+    population: pop,
+    samples: total,
+    warSpecced: total > 0 ? (warSpecced / total * 100) : 0,
+    ecoSpecced: total > 0 ? (ecoSpecced / total * 100) : 0,
+    buffed: total > 0 ? (buffed / total * 100) : 0,
+    debuffed: total > 0 ? (debuffed / total * 100) : 0,
+    neutral: total > 0 ? (neutral / total * 100) : 0,
+    skillLevels
+  };
+}
+
+function renderScanResults() {
+  const container = document.getElementById('scanResults');
+  if (!container) return;
+
+  const countryIds = Object.keys(scanResults);
+  if (countryIds.length === 0) {
+    container.innerHTML = '<div class="loading">No scan results yet</div>';
+    return;
+  }
+
+  container.innerHTML = countryIds.map(countryId => {
+    const result = scanResults[countryId];
+    return renderScanCountryCard(result);
+  }).join('');
+}
+
+function renderScanCountryCard(result) {
+  const {
+    countryName,
+    population,
+    samples,
+    warSpecced,
+    ecoSpecced,
+    buffed,
+    debuffed,
+    neutral,
+    skillLevels
+  } = result;
+
+  // Render skill distributions
+  const warSkillBars = renderSkillBars(skillLevels, ['attack', 'criticalChance', 'criticalDamages', 'armor', 'precision', 'dodge']);
+  const ecoSkillBars = renderSkillBars(skillLevels, ['companies', 'entrepreneurship', 'production', 'management']);
+
+  return `
+    <div class="scan-country-card">
+      <div class="scan-country-header">
+        <span class="scan-country-name">${countryName}</span>
+        <span class="scan-country-pop">Pop: ${formatNumber(population)} | Sample: ${samples}</span>
+      </div>
+      <div class="scan-stats-grid">
+        <div class="scan-stat-block">
+          <div class="scan-stat-title">War Skills</div>
+          <div class="scan-stat-bars">${warSkillBars}</div>
+        </div>
+        <div class="scan-stat-block">
+          <div class="scan-stat-title">Eco Skills</div>
+          <div class="scan-stat-bars">${ecoSkillBars}</div>
+        </div>
+        <div class="scan-stat-block">
+          <div class="scan-stat-title">Buff/Debuff</div>
+          <div class="scan-stat-bars">
+            ${renderBar('Buffed', buffed, 'buff')}
+            ${renderBar('Debuffed', debuffed, 'debuff')}
+            ${renderBar('Neutral', neutral, 'neutral')}
+          </div>
+        </div>
+      </div>
+      <div class="scan-spec-summary">
+        <span class="scan-spec-tag war">War: ${warSpecced.toFixed(0)}%</span>
+        <span class="scan-spec-tag eco">Eco: ${ecoSpecced.toFixed(0)}%</span>
+      </div>
+      <div class="scan-samples-note">Based on ${samples} sampled users</div>
+    </div>
+  `;
+}
+
+function renderSkillBars(skillLevels, skills) {
+  if (!skills || skills.length === 0) return '';
+
+  return skills.map(skill => {
+    const levels = skillLevels[skill] || {};
+    const maxLevel = Object.keys(levels).reduce((max, l) => Math.max(max, parseInt(l)), 0);
+    const topLevel = Math.min(maxLevel, 10); // Show up to level 10
+
+    let bars = '';
+    for (let level = 0; level <= topLevel; level++) {
+      const count = levels[level] || 0;
+      const pct = count > 0 ? (count / Object.values(levels).reduce((a, b) => a + b, 0) * 100) : 0;
+      bars += renderBar(`Lv${level}`, pct, 'neutral');
+    }
+
+    return bars;
+  }).join('');
+}
+
+function renderBar(label, value, colorClass) {
+  return `
+    <div class="scan-stat-bar-row">
+      <span class="scan-stat-label">${label}</span>
+      <div class="scan-stat-bar-bg">
+        <div class="scan-stat-bar-fill ${colorClass}" style="width: ${value}%"></div>
+      </div>
+      <span class="scan-stat-value">${value.toFixed(0)}%</span>
+    </div>
+  `;
+}
+
+function updateScanUI(state) {
+  const statusEl = document.getElementById('scanStatus');
+  const progressEl = document.getElementById('scanProgress');
+  const buttons = document.querySelectorAll('.scan-btn');
+
+  buttons.forEach(btn => btn.disabled = (state === 'scanning'));
+
+  if (state === 'scanning') {
+    progressEl.style.display = 'block';
+    statusEl.textContent = 'Scanning...';
+  } else if (state === 'ready') {
+    progressEl.style.display = 'none';
+    statusEl.textContent = 'Ready';
+  }
+}
+
+function updateScanProgress(percent) {
+  const bar = document.getElementById('progressBar');
+  if (bar) {
+    bar.style.width = `${percent}%`;
+  }
+}
+
+function updateScanStatus(text) {
+  const statusEl = document.getElementById('scanStatus');
+  if (statusEl) {
+    statusEl.textContent = text;
+  }
 }
 
 // --- Init ---
