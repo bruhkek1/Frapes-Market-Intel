@@ -491,7 +491,8 @@ const SCAN_CONFIG = {
   quickSampleSize: 10,  // Users to sample for quick scan
   deepSampleSize: 10,   // Users to sample for deep scan (testing limit)
   apiDelay: 500,        // ms delay between API calls for deep scan
-  topUsersLimit: 100    // Get top 100 users by damage for quick scan
+  topUsersLimit: 100,   // Get top 100 users by damage for quick scan
+  minLevel: 15          // Minimum user level to include in scan
 };
 
 let isScanning = false;
@@ -584,7 +585,9 @@ async function scanCountryQuick(countryId) {
       callAPI('user.getUserLite', { userId: id }).catch(() => null)
     ));
 
-    const validUsers = users.filter(u => u && u.skills);
+    const validUsers = users.filter(u =>
+      u && u.skills && u.leveling && u.leveling.level >= SCAN_CONFIG.minLevel
+    );
 
     return calculatePopulationStats(countryId, validUsers);
   } catch (err) {
@@ -627,7 +630,7 @@ async function scanCountryDeep(countryId) {
     const users = [];
     for (const userId of sampledIds) {
       const userData = await callAPI('user.getUserLite', { userId }).catch(() => null);
-      if (userData && userData.skills) {
+      if (userData && userData.skills && userData.leveling && userData.leveling.level >= SCAN_CONFIG.minLevel) {
         users.push(userData);
       }
       await sleep(200); // Extra delay between user fetches
