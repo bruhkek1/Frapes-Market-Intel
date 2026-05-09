@@ -209,7 +209,7 @@ main {
 .event-item {
   display: grid;
   grid-template-columns: 60px 1fr auto;
-  gap: 10px;
+  gap: 16px;
   align-items: center;
   padding: 6px 8px;
   border-radius: 3px;
@@ -345,6 +345,7 @@ main {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin-left: 40px;
 }
 
 .event-content strong {
