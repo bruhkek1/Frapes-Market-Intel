@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WarEra Intel</title>
+  <link rel="stylesheet" href="intel.css">
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <h1>WarEra Intel</h1>
+      <div class="header-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="status">Connecting...</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="last-update" id="lastUpdate">--:--:--</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Events Feed -->
+    <section class="panel events-panel">
+      <div class="panel-header">
+        <h2>Events Feed</h2>
+        <span class="panel-badge" id="eventCount">-- events</span>
+      </div>
+      <div class="events-list" id="eventsList">
+        <div class="loading">Loading events...</div>
+      </div>
+    </section>
+
+    <!-- Country Rankings -->
+    <section class="panel rankings-panel">
+      <div class="panel-header">
+        <h2>Country Rankings</h2>
+        <div class="ranking-tabs">
+          <button class="ranking-tab active" data-type="countryWealth" onclick="switchRanking('countryWealth')">Wealth</button>
+          <button class="ranking-tab" data-type="countryProductionBonus" onclick="switchRanking('countryProductionBonus')">Production</button>
+          <button class="ranking-tab" data-type="countryBounty" onclick="switchRanking('countryBounty')">Bounty</button>
+          <button class="ranking-tab" data-type="countryDevelopment" onclick="switchRanking('countryDevelopment')">Dev</button>
+        </div>
+      </div>
+      <div class="rankings-list" id="rankingsList">
+        <div class="loading">Loading rankings...</div>
+      </div>
+    </section>
+
+    <!-- Active Battles -->
+    <section class="panel battles-panel">
+      <div class="panel-header">
+        <h2>Active Battles</h2>
+        <span class="panel-badge" id="battleCount">-- active</span>
+      </div>
+      <div class="battles-list" id="battlesList">
+        <div class="loading">Loading battles...</div>
+      </div>
+    </section>
+
+    <!-- Country Intelligence -->
+    <section class="panel intel-panel">
+      <div class="panel-header">
+        <h2>Country Intelligence</h2>
+        <span class="panel-badge">Top 20 by Wealth</span>
+      </div>
+      <div class="intel-grid" id="intelGrid">
+        <div class="loading">Loading country data...</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>WarEra Intel — Read-only display using official public API</span>
+    <span>Events: 30s &bull; Rankings: 60s &bull; Battles: 60s &bull; Intel: 2m</span>
+  </footer>
+
+  <script src="intel.js?v=1"></script>
+</body>
+</html>

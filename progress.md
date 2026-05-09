@@ -118,4 +118,12 @@
 - [x] **Volume display** — Volume numbers shown only on tradeable items
 - [x] **Profit/unit tooltip** — Spread indicator shows both spread % and actual profit per unit
 - [x] **Analytics speed fix** — Volatility threshold 5→3 points, correlations limited to top 10 items, thresholds lowered
-- [x] **Trending indicator** — Lightning badge (⚡) on item with biggest recent volume spike (tradeable only)
+| [x] **Trending indicator** — Lightning badge (⚡) on item with biggest recent volume spike (tradeable only) |
+| [x] **Intelligence Dashboard** — New `intel.html` page with 4 panels: |
+|   - **Events Feed** — Live game events (wars, battles, deposits, peace, alliances) with color-coded type badges |
+|   - **Country Rankings** — Top 10 by Wealth/Production/Bounty/Development with tier badges |
+|   - **Active Battles** — Ongoing conflicts with attacker/defender, damage stats, round tracking |
+|   - **Country Intelligence** — Top 20 countries with wealth, development, allies, wars, unrest, strategic resources |
+|   - Separate from trading dashboard, no nav between them |
+|   - API endpoints: event.getEventsPaginated, ranking.getRanking, battle.getBattles, country.getCountryById |
+|   - Heartbeats: Events 30s, Rankings 60s, Battles 60s, Intel 2m |

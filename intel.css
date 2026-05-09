@@ -1,0 +1,650 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Military camo / gray palette (same as trading) */
+  --bg:          #1a1c1a;
+  --bg-alt:      #151715;
+  --panel:       #222522;
+  --panel-hi:    #2a2e2a;
+  --border:      #333833;
+  --border-lt:   #3d423d;
+
+  --text:        #c8cfc8;
+  --text-dim:    #7a827a;
+  --text-muted:  #555d55;
+
+  --green:       #5a7a5a;
+  --green-bright:#6e9e6e;
+  --green-dim:   #3a4a3a;
+  --green-glow:  #4a6a4a33;
+
+  --olive:       #7a8a5a;
+  --olive-dim:   #4a5a3a;
+
+  --red:         #8a4a4a;
+  --red-dim:     #8a4a4a33;
+
+  --yellow:      #8a8a5a;
+  --yellow-dim:  #8a8a5a33;
+
+  --cyan:        #5a8a8a;
+  --cyan-dim:    #5a8a8a33;
+
+  --purple:      #7a5a8a;
+  --purple-dim:  #7a5a8a33;
+
+  --mono: 'Courier New', 'Consolas', monospace;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Header --- */
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--bg-alt);
+  border-bottom: 2px solid var(--cyan-dim);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+header h1 {
+  font-size: 1.1rem;
+  color: var(--cyan);
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: background 0.3s;
+}
+
+.status-dot.live {
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+}
+
+.status-dot.error {
+  background: var(--red);
+  box-shadow: 0 0 6px var(--red);
+}
+
+.header-right {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+
+/* --- Main Grid --- */
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 16px 24px;
+  flex: 1;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.events-panel   { grid-column: 1 / 3; grid-row: 1; }
+.rankings-panel { grid-column: 1; grid-row: 2; }
+.battles-panel  { grid-column: 2; grid-row: 2; }
+.intel-panel    { grid-column: 1 / 3; grid-row: 3; }
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-header h2 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.panel-badge {
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  background: var(--bg-alt);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+/* --- Ranking Tabs --- */
+
+.ranking-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.ranking-tab {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ranking-tab:hover {
+  border-color: var(--cyan);
+  color: var(--text);
+}
+
+.ranking-tab.active {
+  background: var(--cyan-dim);
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+/* --- Loading / Placeholder --- */
+
+.loading, .placeholder {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 24px;
+}
+
+/* --- Events Feed --- */
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.event-item {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 3px;
+  font-size: 0.78rem;
+  border-left: 3px solid transparent;
+  transition: background 0.15s;
+}
+
+.event-item:hover {
+  background: var(--panel-hi);
+}
+
+.event-item.type-warDeclared { border-left-color: var(--red); }
+.event-item.type-battleOpened { border-left-color: var(--red); }
+.event-item.type-battleEnded { border-left-color: var(--olive); }
+.event-item.type-peaceMade { border-left-color: var(--green-bright); }
+.event-item.type-peace_agreement { border-left-color: var(--green-bright); }
+.event-item.type-revolutionStarted { border-left-color: var(--yellow); }
+.event-item.type-revolutionEnded { border-left-color: var(--cyan); }
+.event-item.type-systemRevolt { border-left-color: var(--yellow); }
+.event-item.type-bankruptcy { border-left-color: var(--yellow); }
+.event-item.type-allianceFormed { border-left-color: var(--green); }
+.event-item.type-allianceBroken { border-left-color: var(--red); }
+.event-item.type-regionLiberated { border-left-color: var(--green-bright); }
+.event-item.type-depositDiscovered { border-left-color: var(--cyan); }
+.event-item.type-depositDepleted { border-left-color: var(--yellow); }
+.event-item.type-strategicResourcesReshuffled { border-left-color: var(--purple); }
+.event-item.type-resistanceIncreased { border-left-color: var(--yellow); }
+.event-item.type-resistanceDecreased { border-left-color: var(--green); }
+.event-item.type-newPresident { border-left-color: var(--cyan); }
+.event-item.type-countryMoneyTransfer { border-left-color: var(--cyan); }
+.event-item.type-financedRevolt { border-left-color: var(--yellow); }
+
+.event-type-badge {
+  font-size: 0.6rem;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.event-item.type-warDeclared .event-type-badge,
+.event-item.type-battleOpened .event-type-badge {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.event-item.type-battleEnded .event-type-badge {
+  background: var(--olive-dim);
+  color: var(--olive);
+}
+
+.event-item.type-peaceMade .event-type-badge,
+.event-item.type-peace_agreement .event-type-badge {
+  background: var(--green-glow);
+  color: var(--green-bright);
+}
+
+.event-item.type-revolutionStarted .event-type-badge,
+.event-item.type-systemRevolt .event-type-badge,
+.event-item.type-financedRevolt .event-type-badge {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+}
+
+.event-item.type-depositDiscovered .event-type-badge {
+  background: var(--cyan-dim);
+  color: var(--cyan);
+}
+
+.event-item.type-depositDepleted .event-type-badge {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+}
+
+.event-item.type-strategicResourcesReshuffled .event-type-badge {
+  background: var(--purple-dim);
+  color: var(--purple);
+}
+
+.event-item.type-allianceFormed .event-type-badge {
+  background: var(--green-glow);
+  color: var(--green);
+}
+
+.event-item.type-allianceBroken .event-type-badge {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.event-item.type-regionLiberated .event-type-badge {
+  background: var(--green-glow);
+  color: var(--green-bright);
+}
+
+.event-item.type-newPresident .event-type-badge {
+  background: var(--cyan-dim);
+  color: var(--cyan);
+}
+
+.event-item.type-countryMoneyTransfer .event-type-badge {
+  background: var(--cyan-dim);
+  color: var(--cyan);
+}
+
+.event-item.type-bankruptcy .event-type-badge {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+}
+
+.event-item.type-resistanceIncreased .event-type-badge {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+}
+
+.event-item.type-resistanceDecreased .event-type-badge {
+  background: var(--green-glow);
+  color: var(--green);
+}
+
+.event-item.type-revolutionEnded .event-type-badge {
+  background: var(--cyan-dim);
+  color: var(--cyan);
+}
+
+.event-content {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* --- Rankings --- */
+
+.rankings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rank-row {
+  display: grid;
+  grid-template-columns: 30px 1fr 70px 50px;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.rank-row:hover {
+  background: var(--panel-hi);
+}
+
+.rank-num {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.rank-num.top3 {
+  color: var(--cyan);
+}
+
+.rank-name {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.rank-value {
+  font-family: var(--mono);
+  font-weight: 600;
+  text-align: right;
+  color: var(--cyan);
+}
+
+.rank-tier {
+  font-size: 0.65rem;
+  text-align: center;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.rank-tier.master { background: #b8860b33; color: #daa520; }
+.rank-tier.diamond { background: #00bfff22; color: #00bfff; }
+.rank-tier.platinum { background: #e5e4e233; color: #e5e4e2; }
+.rank-tier.gold { background: #ffd70033; color: #ffd700; }
+.rank-tier.silver { background: #c0c0c033; color: #c0c0c0; }
+.rank-tier.bronze { background: #cd7f3233; color: #cd7f32; }
+
+/* --- Battles --- */
+
+.battles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.battle-item {
+  padding: 8px;
+  background: var(--bg);
+  border-radius: 3px;
+  border-left: 3px solid var(--red);
+}
+
+.battle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.battle-war-tag {
+  font-size: 0.6rem;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--red);
+  background: var(--red-dim);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.battle-round-info {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+
+.battle-teams {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.battle-team {
+  text-align: center;
+}
+
+.battle-team-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+.battle-team-label {
+  font-size: 0.6rem;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.battle-team-label.attacker { color: var(--red); }
+.battle-team-label.defender { color: var(--olive); }
+
+.battle-vs {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.battle-stats {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  color: var(--text-dim);
+}
+
+.battle-stat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.battle-stat-val {
+  font-weight: 600;
+}
+
+.battle-stat-val.attacker-dmg { color: var(--red); }
+.battle-stat-val.defender-dmg { color: var(--olive); }
+
+/* --- Country Intelligence Grid --- */
+
+.intel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+}
+
+.intel-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 10px;
+  transition: all 0.15s;
+  border-left: 3px solid var(--cyan);
+}
+
+.intel-card:hover {
+  background: var(--panel-hi);
+  border-color: var(--cyan);
+}
+
+.intel-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.intel-card-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.82rem;
+  text-transform: capitalize;
+}
+
+.intel-card-rank {
+  font-size: 0.65rem;
+  font-family: var(--mono);
+  color: var(--cyan);
+  background: var(--cyan-dim);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.intel-card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 8px;
+  font-size: 0.72rem;
+}
+
+.intel-stat {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-dim);
+}
+
+.intel-stat-label {
+  color: var(--text-muted);
+}
+
+.intel-stat-value {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.intel-stat-value.wealth { color: var(--cyan); }
+.intel-stat-value.wars { color: var(--red); }
+.intel-stat-value.allies { color: var(--green-bright); }
+.intel-stat-value.unrest-high { color: var(--yellow); }
+.intel-stat-value.unrest-low { color: var(--green); }
+
+.intel-card-resources {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  font-size: 0.7rem;
+}
+
+.intel-resource-label {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.intel-resource-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.intel-resource-tag {
+  font-size: 0.65rem;
+  font-family: var(--mono);
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: var(--purple-dim);
+  color: var(--purple);
+  text-transform: capitalize;
+}
+
+/* --- Footer --- */
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+  .events-panel, .rankings-panel, .battles-panel, .intel-panel {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
