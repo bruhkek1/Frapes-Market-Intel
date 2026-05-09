@@ -222,26 +222,26 @@ main {
   background: var(--panel-hi);
 }
 
-.event-item.type-warDeclared { border-left-color: var(--red); }
-.event-item.type-battleOpened { border-left-color: var(--red); }
-.event-item.type-battleEnded { border-left-color: var(--olive); }
-.event-item.type-peaceMade { border-left-color: var(--green-bright); }
-.event-item.type-peace_agreement { border-left-color: var(--green-bright); }
-.event-item.type-revolutionStarted { border-left-color: var(--yellow); }
-.event-item.type-revolutionEnded { border-left-color: var(--cyan); }
-.event-item.type-systemRevolt { border-left-color: var(--yellow); }
-.event-item.type-bankruptcy { border-left-color: var(--yellow); }
-.event-item.type-allianceFormed { border-left-color: var(--green); }
-.event-item.type-allianceBroken { border-left-color: var(--red); }
-.event-item.type-regionLiberated { border-left-color: var(--green-bright); }
-.event-item.type-depositDiscovered { border-left-color: var(--cyan); }
-.event-item.type-depositDepleted { border-left-color: var(--yellow); }
-.event-item.type-strategicResourcesReshuffled { border-left-color: var(--purple); }
-.event-item.type-resistanceIncreased { border-left-color: var(--yellow); }
-.event-item.type-resistanceDecreased { border-left-color: var(--green); }
-.event-item.type-newPresident { border-left-color: var(--cyan); }
-.event-item.type-countryMoneyTransfer { border-left-color: var(--cyan); }
-.event-item.type-financedRevolt { border-left-color: var(--yellow); }
+.event-item.type-warDeclared { border-left-color: var(--red); --evt-color: var(--red); }
+.event-item.type-battleOpened { border-left-color: var(--red); --evt-color: var(--red); }
+.event-item.type-battleEnded { border-left-color: var(--olive); --evt-color: var(--olive); }
+.event-item.type-peaceMade { border-left-color: var(--green-bright); --evt-color: var(--green-bright); }
+.event-item.type-peace_agreement { border-left-color: var(--green-bright); --evt-color: var(--green-bright); }
+.event-item.type-revolutionStarted { border-left-color: var(--yellow); --evt-color: var(--yellow); }
+.event-item.type-revolutionEnded { border-left-color: var(--cyan); --evt-color: var(--cyan); }
+.event-item.type-systemRevolt { border-left-color: var(--yellow); --evt-color: var(--yellow); }
+.event-item.type-bankruptcy { border-left-color: var(--yellow); --evt-color: var(--yellow); }
+.event-item.type-allianceFormed { border-left-color: var(--green); --evt-color: var(--green); }
+.event-item.type-allianceBroken { border-left-color: var(--red); --evt-color: var(--red); }
+.event-item.type-regionLiberated { border-left-color: var(--green-bright); --evt-color: var(--green-bright); }
+.event-item.type-depositDiscovered { border-left-color: var(--cyan); --evt-color: var(--cyan); }
+.event-item.type-depositDepleted { border-left-color: var(--yellow); --evt-color: var(--yellow); }
+.event-item.type-strategicResourcesReshuffled { border-left-color: var(--purple); --evt-color: var(--purple); }
+.event-item.type-resistanceIncreased { border-left-color: var(--yellow); --evt-color: var(--yellow); }
+.event-item.type-resistanceDecreased { border-left-color: var(--green); --evt-color: var(--green); }
+.event-item.type-newPresident { border-left-color: var(--cyan); --evt-color: var(--cyan); }
+.event-item.type-countryMoneyTransfer { border-left-color: var(--cyan); --evt-color: var(--cyan); }
+.event-item.type-financedRevolt { border-left-color: var(--yellow); --evt-color: var(--yellow); }
 
 .event-type-badge {
   font-size: 0.6rem;
@@ -341,11 +341,11 @@ main {
 }
 
 .event-content {
-  color: var(--text);
+  color: var(--evt-color);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-left: 40px;
+  margin-left: 80px;
 }
 
 .event-content strong {
