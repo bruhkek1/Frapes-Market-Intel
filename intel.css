@@ -209,7 +209,7 @@ main {
 .event-item {
   display: grid;
   grid-template-columns: 60px 1fr auto;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
   padding: 6px 8px;
   border-radius: 3px;
@@ -253,6 +253,7 @@ main {
   text-align: center;
   font-weight: 600;
   white-space: nowrap;
+  margin-right: 8px;
 }
 
 .event-item.type-warDeclared .event-type-badge,
@@ -344,6 +345,14 @@ main {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.event-content strong {
+  margin-right: 6px;
+}
+
+.event-content strong + strong {
+  margin-right: 10px;
 }
 
 .event-time {
