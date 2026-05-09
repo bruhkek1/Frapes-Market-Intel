@@ -533,25 +533,151 @@ main {
 
 .intel-controls {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  flex: 1;
 }
 
-.intel-controls select {
+.country-selector {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.selector-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selector-input-wrap input {
+  flex: 1;
   background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 3px;
-  padding: 4px 8px;
+  padding: 4px 10px;
   font-size: 0.72rem;
   font-family: var(--mono);
-  cursor: pointer;
-  min-width: 160px;
 }
 
-.intel-controls select:focus {
+.selector-input-wrap input:focus {
   outline: none;
   border-color: var(--cyan);
+}
+
+.selector-input-wrap input::placeholder {
+  color: var(--text-muted);
+}
+
+.selector-count {
+  font-size: 0.65rem;
+  color: var(--cyan);
+  font-family: var(--mono);
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: right;
+}
+
+.quick-select-btns {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.qs-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 0.65rem;
+  font-family: var(--mono);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.qs-btn:hover {
+  border-color: var(--cyan);
+  color: var(--text);
+}
+
+.qs-btn.qs-clear {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.qs-btn.qs-clear:hover {
+  background: var(--red);
+  color: var(--bg);
+}
+
+.selector-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  margin-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.selector-dropdown.open {
+  display: block;
+}
+
+.selector-list {
+  padding: 4px 0;
+}
+
+.selector-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.1s;
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+.selector-item:hover {
+  background: var(--panel-hi);
+}
+
+.selector-item.selected {
+  background: var(--cyan-dim);
+  color: var(--cyan);
+}
+
+.selector-item .check-mark {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.selector-item .country-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selector-item .country-name .highlight {
+  color: var(--cyan);
+  font-weight: 700;
 }
 
 .intel-grid {

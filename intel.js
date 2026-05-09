@@ -39,40 +39,100 @@ async function fetchAllCountries() {
 }
 
 function populateCountryDropdown() {
-  const selector = document.getElementById('countrySelector');
-  if (!selector) return;
+  const list = document.getElementById('selectorList');
+  if (!list) return;
 
-  // Remove all existing options except the first 3 (Quick Select section)
-  while (selector.options.length > 4) {
-    selector.remove(3);
-  }
+  // Render all countries
+  renderCountryList(allCountriesList);
+}
 
-  // Add country options
-  for (const c of allCountriesList) {
-    const opt = document.createElement('option');
-    opt.value = c._id;
-    opt.textContent = c.name;
-    selector.add(opt, null);
+function renderCountryList(countries, filter = '') {
+  const list = document.getElementById('selectorList');
+  if (!list) return;
+
+  // Filter countries by search
+  const filtered = filter
+    ? countries.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()))
+    : countries;
+
+  list.innerHTML = filtered.map(c => {
+    const isSelected = intelCountryIds && intelCountryIds.includes(c._id);
+    const name = filter
+      ? highlightMatch(c.name, filter)
+      : c.name;
+    return `
+      <div class="selector-item ${isSelected ? 'selected' : ''}" data-id="${c._id}" onclick="toggleCountry('${c._id}')">
+        <span class="check-mark">${isSelected ? '☑' : '☐'}</span>
+        <span class="country-name">${name}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Show/hide dropdown message
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-muted);font-size:0.75rem;font-family:var(--mono);">No countries found</div>';
   }
 }
 
-function handleCountrySelectorChange(e) {
-  const selector = e.target;
-  const selectedValues = Array.from(selector.selectedOptions).map(o => o.value);
+function highlightMatch(text, query) {
+  if (!query) return text;
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(regex, '<span class="highlight">$1</span>');
+}
 
-  // Check for quick select presets
-  if (selectedValues.length === 1 && ['top20', 'top10', 'all'].includes(selectedValues[0])) {
-    const preset = selectedValues[0];
-    intelCountryIds = null; // Reset to auto mode
-    fetchCountryIntel();
-    return;
+function toggleCountry(id) {
+  if (!intelCountryIds) intelCountryIds = [];
+
+  const idx = intelCountryIds.indexOf(id);
+  if (idx > -1) {
+    intelCountryIds.splice(idx, 1);
+    if (intelCountryIds.length === 0) intelCountryIds = null;
+  } else {
+    intelCountryIds.push(id);
   }
 
-  // User selected specific countries
-  if (selectedValues.length > 0) {
-    intelCountryIds = selectedValues;
+  updateSelectorUI();
+  fetchCountryIntel();
+}
+
+function selectPreset(preset) {
+  intelCountryIds = null;
+
+  if (preset === 'top20') {
+    fetchCountryIntel();
+  } else if (preset === 'top10') {
+    fetchRankingsForPreset('countryProductionBonus');
+  } else if (preset === 'all') {
+    intelCountryIds = Object.keys(countryCache);
+    updateSelectorUI();
     fetchCountryIntel();
   }
+}
+
+function fetchRankingsForPreset(type) {
+  callAPI('ranking.getRanking', { rankingType: type }).then(data => {
+    if (data && data.items) {
+      intelCountryIds = data.items.slice(0, 10).map(item => item.country);
+      updateSelectorUI();
+      fetchCountryIntel();
+    }
+  });
+}
+
+function clearSelection() {
+  intelCountryIds = null;
+  updateSelectorUI();
+  fetchCountryIntel();
+}
+
+function updateSelectorUI() {
+  const countEl = document.getElementById('selectorCount');
+  const count = intelCountryIds ? intelCountryIds.length : 0;
+  countEl.textContent = count === 0 ? '0 selected' : `${count} selected`;
+
+  // Re-render list to update checkmarks
+  const filter = document.getElementById('countrySearchInput')?.value || '';
+  renderCountryList(allCountriesList, filter);
 }
 
 async function fetchAllRegions() {
@@ -428,11 +488,37 @@ async function init() {
   await fetchAllCountries();
   await fetchAllRegions();
 
-  // Attach dropdown change listener
-  const selector = document.getElementById('countrySelector');
-  if (selector) {
-    selector.addEventListener('change', handleCountrySelectorChange);
+  // Wire up search input
+  const searchInput = document.getElementById('countrySearchInput');
+  const selectorWrap = document.querySelector('.selector-input-wrap');
+  if (searchInput) {
+    searchInput.addEventListener('focus', () => {
+      document.getElementById('selectorDropdown')?.classList.add('open');
+    });
+    searchInput.addEventListener('input', (e) => {
+      const filter = e.target.value;
+      renderCountryList(allCountriesList, filter);
+    });
   }
+
+  // Click on input wrap to toggle dropdown
+  if (selectorWrap) {
+    selectorWrap.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('selectorDropdown');
+      if (dropdown) {
+        dropdown.classList.toggle('open');
+      }
+    });
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('selectorDropdown');
+    const selector = document.querySelector('.country-selector');
+    if (dropdown && selector && !selector.contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
 
   // Initial data fetch
   await fetchEvents();

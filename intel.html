@@ -64,13 +64,23 @@
       <div class="panel-header">
         <h2>Country Intelligence</h2>
         <div class="intel-controls">
-          <select id="countrySelector" multiple>
-            <option value="top20">— Quick Select —</option>
-            <option value="top20">Top 20 by Wealth</option>
-            <option value="top10">Top 10 by Production</option>
-            <option value="all">All Countries</option>
-            <option disabled>─────────────</option>
-          </select>
+          <div class="country-selector">
+            <div class="selector-input-wrap">
+              <input type="text" id="countrySearchInput" placeholder="Search countries..." autocomplete="off">
+              <span class="selector-count" id="selectorCount">0 selected</span>
+            </div>
+            <div class="quick-select-btns">
+              <button class="qs-btn" onclick="selectPreset('top20')">Top 20 Wealth</button>
+              <button class="qs-btn" onclick="selectPreset('top10')">Top 10 Prod</button>
+              <button class="qs-btn" onclick="selectPreset('all')">All Countries</button>
+              <button class="qs-btn qs-clear" onclick="clearSelection()">Clear</button>
+            </div>
+            <div class="selector-dropdown" id="selectorDropdown">
+              <div class="selector-list" id="selectorList">
+                <!-- countries injected here -->
+              </div>
+            </div>
+          </div>
           <span class="panel-badge" id="intelCount">-- countries</span>
         </div>
       </div>
