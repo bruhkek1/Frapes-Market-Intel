@@ -63,7 +63,16 @@
     <section class="panel intel-panel">
       <div class="panel-header">
         <h2>Country Intelligence</h2>
-        <span class="panel-badge">Top 20 by Wealth</span>
+        <div class="intel-controls">
+          <select id="countrySelector" multiple>
+            <option value="top20">— Quick Select —</option>
+            <option value="top20">Top 20 by Wealth</option>
+            <option value="top10">Top 10 by Production</option>
+            <option value="all">All Countries</option>
+            <option disabled>─────────────</option>
+          </select>
+          <span class="panel-badge" id="intelCount">-- countries</span>
+        </div>
       </div>
       <div class="intel-grid" id="intelGrid">
         <div class="loading">Loading country data...</div>

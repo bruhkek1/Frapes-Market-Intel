@@ -2,7 +2,9 @@ const API = 'https://api2.warera.io/trpc';
 
 let countryCache = {};  // countryId -> country name
 let regionCache = {};   // regionId -> region name
+let allCountriesList = []; // Sorted list of all countries for dropdown
 let currentRanking = 'countryWealth';
+let intelCountryIds = null; // null = auto (top 20), array = user selected
 
 // --- API Calls ---
 
@@ -30,6 +32,46 @@ async function fetchAllCountries() {
     for (const c of countries) {
       countryCache[c._id] = c.name;
     }
+    // Sort alphabetically for dropdown
+    allCountriesList = countries.sort((a, b) => a.name.localeCompare(b.name));
+    populateCountryDropdown();
+  }
+}
+
+function populateCountryDropdown() {
+  const selector = document.getElementById('countrySelector');
+  if (!selector) return;
+
+  // Remove all existing options except the first 3 (Quick Select section)
+  while (selector.options.length > 4) {
+    selector.remove(3);
+  }
+
+  // Add country options
+  for (const c of allCountriesList) {
+    const opt = document.createElement('option');
+    opt.value = c._id;
+    opt.textContent = c.name;
+    selector.add(opt, null);
+  }
+}
+
+function handleCountrySelectorChange(e) {
+  const selector = e.target;
+  const selectedValues = Array.from(selector.selectedOptions).map(o => o.value);
+
+  // Check for quick select presets
+  if (selectedValues.length === 1 && ['top20', 'top10', 'all'].includes(selectedValues[0])) {
+    const preset = selectedValues[0];
+    intelCountryIds = null; // Reset to auto mode
+    fetchCountryIntel();
+    return;
+  }
+
+  // User selected specific countries
+  if (selectedValues.length > 0) {
+    intelCountryIds = selectedValues;
+    fetchCountryIntel();
   }
 }
 
@@ -250,14 +292,20 @@ function renderBattles(battles) {
 // --- Country Intelligence ---
 
 async function fetchCountryIntel() {
-  // Get top 20 countries by wealth
-  const data = await callAPI('ranking.getRanking', { rankingType: 'countryWealth' });
-  if (!data || !data.items) return;
+  let countryIds;
 
-  const topCountries = data.items.slice(0, 20).map(item => item.country);
+  if (intelCountryIds) {
+    // User selected specific countries
+    countryIds = intelCountryIds;
+  } else {
+    // Auto mode: get top 20 by wealth
+    const data = await callAPI('ranking.getRanking', { rankingType: 'countryWealth' });
+    if (!data || !data.items) return;
+    countryIds = data.items.slice(0, 20).map(item => item.country);
+  }
 
   // Fetch full country details in parallel
-  const countryPromises = topCountries.map(id =>
+  const countryPromises = countryIds.map(id =>
     callAPI('country.getCountryById', { countryId: id })
   );
 
@@ -267,6 +315,7 @@ async function fetchCountryIntel() {
     .map(r => r.value);
 
   renderCountryIntel(validCountries);
+  document.getElementById('intelCount').textContent = `${validCountries.length} countries`;
 }
 
 function renderCountryIntel(countries) {
@@ -378,6 +427,12 @@ async function init() {
   // Load country names first (needed for all lookups)
   await fetchAllCountries();
   await fetchAllRegions();
+
+  // Attach dropdown change listener
+  const selector = document.getElementById('countrySelector');
+  if (selector) {
+    selector.addEventListener('change', handleCountrySelectorChange);
+  }
 
   // Initial data fetch
   await fetchEvents();
