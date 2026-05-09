@@ -601,11 +601,12 @@ async function scanCountryDeep(countryId) {
     let hasMore = true;
 
     while (hasMore) {
-      const data = await callAPI('user.getUsersByCountry', {
-        countryId,
-        limit: 100,
-        cursor
-      });
+      const params = { countryId, limit: 100 };
+      if (cursor) {
+        params.cursor = cursor;
+      }
+
+      const data = await callAPI('user.getUsersByCountry', params);
 
       if (!data || !data.items) break;
 
