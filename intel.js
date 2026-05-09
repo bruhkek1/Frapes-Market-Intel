@@ -364,6 +364,9 @@ async function fetchCountryIntel() {
     countryIds = data.items.slice(0, 20).map(item => item.country);
   }
 
+  // Track displayed countries for scan buttons
+  displayedCountryIds = countryIds;
+
   // Fetch full country details in parallel
   const countryPromises = countryIds.map(id =>
     callAPI('country.getCountryById', { countryId: id })
@@ -498,6 +501,9 @@ const SCAN_CONFIG = {
 };
 
 let isScanning = false;
+
+// Currently displayed country IDs (updated by fetchCountryIntel)
+let displayedCountryIds = [];
 let scanResults = {};
 
 // --- Single-Country Quick Scan from Intel Card ---
@@ -586,17 +592,11 @@ async function startQuickScan() {
     return;
   }
 
-  // Resolve country IDs (same logic as fetchCountryIntel)
-  let countryIds;
-  if (intelCountryIds) {
-    countryIds = intelCountryIds;
-  } else {
-    const data = await callAPI('ranking.getRanking', { rankingType: 'countryWealth' });
-    if (!data || !data.items) {
-      alert('Failed to load country list');
-      return;
-    }
-    countryIds = data.items.slice(0, 20).map(item => item.country);
+  // Use currently displayed countries (no new API calls)
+  const countryIds = displayedCountryIds;
+  if (!countryIds || countryIds.length === 0) {
+    alert('No countries displayed. Select countries or wait for the intel grid to load.');
+    return;
   }
 
   isScanning = true;
@@ -630,17 +630,11 @@ async function startDeepScan() {
     return;
   }
 
-  // Resolve country IDs (same logic as fetchCountryIntel)
-  let countryIds;
-  if (intelCountryIds) {
-    countryIds = intelCountryIds;
-  } else {
-    const data = await callAPI('ranking.getRanking', { rankingType: 'countryWealth' });
-    if (!data || !data.items) {
-      alert('Failed to load country list');
-      return;
-    }
-    countryIds = data.items.slice(0, 20).map(item => item.country);
+  // Use currently displayed countries (no new API calls)
+  const countryIds = displayedCountryIds;
+  if (!countryIds || countryIds.length === 0) {
+    alert('No countries displayed. Select countries or wait for the intel grid to load.');
+    return;
   }
 
   isScanning = true;
