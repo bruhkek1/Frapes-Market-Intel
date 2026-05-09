@@ -411,7 +411,8 @@ function renderCountryIntel(countries) {
         <div class="intel-card-header">
           <span class="intel-card-name">${c.name}</span>
           <span class="intel-card-rank">#${rank}</span>
-          <span class="intel-card-scan-btn" onclick="quickScanCountry('${c._id}')" title="Quick Scan this country">⚡ Scan</span>
+          <span class="intel-card-scan-btn" onclick="quickScanCountry('${c._id}')" title="Quick Scan this country">⚡ Quick</span>
+          <span class="intel-card-scan-btn deep" onclick="deepScanCountry('${c._id}')" title="Deep Scan this country">🔍 Deep</span>
         </div>
         <div class="intel-card-stats">
           <div class="intel-stat">
@@ -531,6 +532,45 @@ async function quickScanCountry(countryId) {
     }
   } catch (err) {
     console.error('Quick scan failed:', err);
+    statusEl.textContent = 'Scan failed';
+  } finally {
+    isScanning = false;
+    if (btn) btn.disabled = false;
+    if (progressEl) progressEl.style.display = 'none';
+    if (bar) bar.style.width = '0%';
+  }
+}
+
+async function deepScanCountry(countryId) {
+  const name = resolveCountry(countryId);
+  const statusEl = document.getElementById('scanStatus');
+  const resultsEl = document.getElementById('scanResults');
+
+  // Scroll to scan panel
+  const scanPanel = document.querySelector('.scan-panel');
+  if (scanPanel) scanPanel.scrollIntoView({ behavior: 'smooth' });
+
+  // Show scanning state
+  isScanning = true;
+  const btn = document.querySelector('.scan-btn');
+  if (btn) btn.disabled = true;
+  statusEl.textContent = `Deep scanning ${name}...`;
+  const progressEl = document.getElementById('scanProgress');
+  if (progressEl) progressEl.style.display = 'block';
+  const bar = document.getElementById('progressBar');
+  if (bar) bar.style.width = '30%';
+
+  try {
+    const result = await scanCountryDeep(countryId);
+    if (result) {
+      scanResults = { [countryId]: result };
+      renderScanResults();
+      statusEl.textContent = `Done: ${name}`;
+    } else {
+      statusEl.textContent = `No data for ${name}`;
+    }
+  } catch (err) {
+    console.error('Deep scan failed:', err);
     statusEl.textContent = 'Scan failed';
   } finally {
     isScanning = false;

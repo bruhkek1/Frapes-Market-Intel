@@ -739,6 +739,16 @@ main {
   color: var(--cyan);
 }
 
+.intel-card-scan-btn.deep {
+  color: var(--yellow);
+  border-color: var(--yellow-dim);
+}
+
+.intel-card-scan-btn.deep:hover {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+}
+
 .intel-card-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
